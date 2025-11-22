@@ -41,7 +41,10 @@ storageClasses:
       fsType: nfs
     mountOptions:
       - noatime
-      - nfsvers=4
+      - nfsvers=4.2
+      - nconnect=8
+      - hard
+      - nodiratime
  
 volumeSnapshotClasses:
   - name: truenas
