@@ -1,5 +1,5 @@
 csiDriver:
-  name: iscsi
+  name: org.democratic-csi.freenas-api-iscsi
 driver:
   config:
     driver: freenas-api-iscsi
@@ -67,7 +67,7 @@ driver:
       # default is "{{ name }}"
       #nameTemplate: "{{ parameters.[csi.storage.k8s.io/pvc/namespace] }}-{{ parameters.[csi.storage.k8s.io/pvc/name] }}"
       namePrefix: csi-
-      nameSuffix: "-clustera"
+      nameSuffix: "-talos"
     
       # add as many as needed
       targetGroups:
@@ -93,3 +93,37 @@ driver:
       extentRpm: ""
       # 0-100 (0 == ignore)
       extentAvailThreshold: 0
+
+storageClasses:
+  - name: truenas-iscsi
+    defaultClass: true
+    reclaimPolicy: Delete
+    volumeBindingMode: Immediate
+    allowVolumeExpansion: true
+    parameters:
+      fsType: ext4
+      detachedVolumesFromSnapshots: "false"
+    mountOptions: []
+    secrets:
+      provisioner-secret:
+      controller-publish-secret:
+      node-stage-secret:
+      node-publish-secret:
+      controller-expand-secret:
+
+volumeSnapshotClasses:
+  - name: truenas-iscsi
+    parameters:
+      detachedSnapshots: "true"
+
+node:
+  hostPID: true
+  driver:
+    extraEnv:
+      - name: ISCSIADM_HOST_STRATEGY
+        value: nsenter
+      - name: ISCSIADM_HOST_PATH
+        value: /usr/local/sbin/iscsiadm
+    iscsiDirHostPath: /usr/local/etc/iscsi
+    iscsiDirHostPathType: ""
+
