@@ -9,8 +9,8 @@ driver:
       allowInsecure: true
       apiVersion: 2
     zfs:
-      datasetParentName: main/k8s/nfs/vols
-      detachedSnapshotsDatasetParentName: main/k8s/nfs/snaps
+      datasetParentName: /mnt/main/k8s/nfs/vols
+      detachedSnapshotsDatasetParentName: /mnt/main/k8s/nfs/snaps
       datasetEnableQuotas: true
       datasetEnableReservation: false
       datasetPermissionsMode: "0777"
