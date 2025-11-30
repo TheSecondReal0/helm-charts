@@ -1,0 +1,7 @@
+apiVersion: v2
+name: whoami
+description: A Helm chart for deploying whoami test service
+type: application
+version: 0.1.0
+appVersion: "latest"
+

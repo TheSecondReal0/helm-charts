@@ -1,0 +1,27 @@
+image:
+  repository: vabene1111/recipes
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+tandoor:
+  host: tandoor.asaio.net
+
+externalSecrets:
+  secretStoreRef:
+    name: openbao
+    kind: ClusterSecretStore
+
+persistence:
+  staticfiles:
+    enabled: true
+    size: 5Gi
+    mountPath: /opt/recipes/staticfiles
+  mediafiles:
+    enabled: true
+    size: 10Gi
+    mountPath: /opt/recipes/mediafiles
+

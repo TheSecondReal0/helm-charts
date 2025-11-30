@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: tandoor
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+
+          env:
+            # non-secret
+            - name: ALLOWED_HOSTS
+              value: {{ .Values.tandoor.host }}
+            - name: DB_ENGINE
+              value: django.db.backends.postgresql
+            - name: POSTGRES_HOST
+              value: truenas.asaio
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: tandoor
+            - name: POSTGRES_DB
+              value: tandoor
+            - name: REMOTE_USER_AUTH
+              value: "1"
+            - name: SOCIAL_DEFAULT_GROUP
+              value: guest
+            - name: SOCIAL_PROVIDERS
+              value: allauth.socialaccount.providers.openid_connect
+            - name: TZ
+              value: America/Denver
+
+            # secret values from ESO-managed Secret
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secret-key
+                  key: value
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgres
+                  key: password
+            - name: SOCIALACCOUNT_PROVIDERS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-socialaccount-providers
+                  key: json
+
+          volumeMounts:
+            - name: staticfiles
+              mountPath: /opt/recipes/staticfiles
+            - name: mediafiles
+              mountPath: /opt/recipes/mediafiles
+
+      volumes:
+        - name: staticfiles
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-staticfiles
+        - name: mediafiles
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-mediafiles
+
