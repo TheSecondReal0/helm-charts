@@ -1,0 +1,7 @@
+image:
+  repository: bentopdf/bentopdf
+  tag: latest
+
+route:
+  host: bentopdf.asaio.net
+
