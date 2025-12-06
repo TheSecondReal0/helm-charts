@@ -1,0 +1,7 @@
+apiVersion: v2
+name: vikunja
+description: A Helm chart for deploying Vikunja
+type: application
+version: 0.1.0
+appVersion: "latest"
+

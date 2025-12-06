@@ -1,0 +1,16 @@
+image:
+  repository: vikunja/vikunja
+  tag: latest
+
+service:
+  host: vikunja.asaio.net
+
+externalSecrets:
+  secretStoreRef:
+    name: openbao
+    kind: ClusterSecretStore
+
+persistence:
+  files:
+    size: 5Gi
+

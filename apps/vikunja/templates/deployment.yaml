@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: vikunja
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3456
+
+          env:
+            # non-secret
+            - name: VIKUNJA_SERVICE_PUBLICURL
+              value: https://{{ .Values.service.host }}
+            - name: VIKUNJA_DATABASE_TYPE
+              value: postgres
+            - name: VIKUNJA_DATABASE_HOST
+              value: postgres.asaio
+            - name: VIKUNJA_DATABASE_USER
+              value: vikunja
+            - name: VIKUNJA_DATABASE_DATABASE
+              value: vikunja
+            - name: VIKUNJA_SERVICE_ENABLEREGISTRATION
+              value: "false"
+
+            # secret values from ESO-managed Secret
+            - name: VIKUNJA_SERVICE_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-jwt-secret
+                  key: value
+            - name: VIKUNJA_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgres
+                  key: password
+
+          volumeMounts:
+            - name: files
+              mountPath: /app/vikunja/files
+            - name: oidc
+              mountPath: /etc/vikunja
+
+      volumes:
+        - name: files
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-files
+        # oidc/oauth config comes from a secret because we need api keys/passwords in it
+        # vikunja does not support setting these via env vars
+        - name: oidc
+          secret:
+            secretName: {{ .Release.Name }}-oidc
+
