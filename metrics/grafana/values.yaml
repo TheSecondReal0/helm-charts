@@ -472,13 +472,12 @@ initChownData:
   ## initChownData resource requests and limits
   ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
   ##
-  resources: {}
-  #  limits:
-  #    cpu: 100m
-  #    memory: 128Mi
-  #  requests:
-  #    cpu: 100m
-  #    memory: 128Mi
+  resources:
+   limits:
+     memory: 128Mi
+   requests:
+     cpu: 100m
+     memory: 512Mi
   securityContext:
     readOnlyRootFilesystem: false
     runAsNonRoot: false
@@ -498,9 +497,9 @@ adminUser: admin
 # Use an existing secret for the admin user.
 admin:
   ## Name of the secret. Can be templated.
-  existingSecret: ""
-  userKey: admin-user
-  passwordKey: admin-password
+  existingSecret: grafana-admin
+  userKey: username
+  passwordKey: password
 
 ## Define command to be executed at startup by grafana container
 ## Needed if using `vault-env` to manage secrets (ref: https://banzaicloud.com/blog/inject-secrets-into-pods-vault/)
@@ -952,8 +951,8 @@ shareProcessNamespace: false
 smtp:
   # `existingSecret` is a reference to an existing secret containing the smtp configuration
   # for Grafana.
-  existingSecret: ""
-  userKey: "user"
+  existingSecret: "grafana-admin"
+  userKey: "username"
   passwordKey: "password"
 
 ## Sidecars that collect the configmaps with specified label and stores the included files them into the respective folders
@@ -1665,7 +1664,31 @@ enableKubeBackwardCompatibility: false
 useStatefulSet: false
 
 # extraObjects could be utilized to add dynamic manifests via values
-extraObjects: []
+extraObjects:
+  - |
+    apiVersion: external-secrets.io/v1
+    kind: ExternalSecret
+    metadata:
+      name: {{ .Release.Name }}-admin
+    spec:
+      refreshInterval: 1h
+      secretStoreRef:
+        name: openbao
+        kind: ClusterSecretStore
+      target:
+        name: {{ .Release.Name }}-admin
+        creationPolicy: Owner
+        template:
+          type: Opaque
+      data:
+        - secretKey: username
+          remoteRef:
+            key: {{ .Release.Name }}/admin
+            property: username
+        - secretKey: password
+          remoteRef:
+            key: {{ .Release.Name }}/admin
+            property: password
 # Examples:
 # extraObjects:
 # - apiVersion: kubernetes-client.io/v1
