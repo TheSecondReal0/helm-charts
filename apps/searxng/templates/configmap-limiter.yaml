@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: searxng-limiter
+data:
+  limiter.toml: |
+    [botdetection.ip_limit]
+    link_token = true
+

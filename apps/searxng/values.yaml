@@ -1,0 +1,16 @@
+image:
+  repository: docker.io/searxng/searxng
+  tag: latest
+
+redis:
+  image: docker.io/valkey/valkey:8-alpine
+  storage: 1Gi
+
+service:
+  host: searxng.asaio.net
+
+externalSecrets:
+  secretStoreRef:
+    name: openbao
+    kind: ClusterSecretStore
+
