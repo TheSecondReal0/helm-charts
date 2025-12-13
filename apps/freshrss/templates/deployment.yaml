@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Release.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 80
+          env:
+            - name: BASE_URL
+              value: "https://{{ .Values.service.host }}/"
+            - name: DB_HOST
+              value: postgres.asaio
+            - name: DB_BASE
+              value: freshrss
+            - name: DB_USER
+              value: freshrss
+            - name: OIDC_ENABLED
+              value: "1"
+            - name: OIDC_PROVIDER_METADATA_URL
+              value: https://auth.asaio.net/application/o/freshrss/.well-known/openid-configuration
+            - name: OIDC_X_FORWARDED_HEADERS
+              value: X-Forwarded-Host
+
+            - name: ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-admin
+                  key: email
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-admin
+                  key: password
+            - name: ADMIN_API_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-admin
+                  key: api-password
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgres
+                  key: password
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-oidc
+                  key: client-id
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-oidc
+                  key: client-secret
+

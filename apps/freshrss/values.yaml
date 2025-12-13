@@ -1,0 +1,12 @@
+image:
+  repository: freshrss/freshrss
+  tag: latest
+
+service:
+  host: freshrss.asaio.net
+
+externalSecrets:
+  secretStoreRef:
+    name: openbao
+    kind: ClusterSecretStore
+
