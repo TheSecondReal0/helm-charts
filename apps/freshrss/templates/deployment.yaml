@@ -31,7 +31,10 @@ spec:
             - name: OIDC_PROVIDER_METADATA_URL
               value: https://auth.asaio.net/application/o/freshrss/.well-known/openid-configuration
             - name: OIDC_X_FORWARDED_HEADERS
-              value: X-Forwarded-Host
+              value: X-Forwarded-Port X-Forwarded-Proto X-Forwarded-Host
+              # value: X-Forwarded-Host
+            - name: OIDC_SCOPES
+              value: openid email profile
 
             - name: ADMIN_EMAIL
               valueFrom:
