@@ -1,6 +1,6 @@
 image:
   repository: vikunja/vikunja
-  tag: latest
+  tag: 2.3.0
 
 service:
   host: vikunja.asaio.net
