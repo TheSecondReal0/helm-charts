@@ -1,6 +1,6 @@
 image:
-  repository: bentopdf/bentopdf
-  tag: latest
+  repository: ghcr.io/alam00000/bentopdf
+  tag: 2.8.2
 
 route:
   host: bentopdf.asaio.net
