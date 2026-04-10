@@ -2,8 +2,8 @@ image:
   repository: docker.io/searxng/searxng
   tag: latest
 
-redis:
-  image: docker.io/valkey/valkey:8-alpine
+valkey:
+  image: docker.io/valkey/valkey:9-alpine
   storage: 1Gi
 
 service:
