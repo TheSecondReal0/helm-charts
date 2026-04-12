@@ -22,6 +22,9 @@ externalSecrets:
   secretStoreRef:
     name: openbao
     kind: ClusterSecretStore
+  githubToken:
+    key: hermes/github-token
+    property: token
 
 httproute:
   enabled: true
