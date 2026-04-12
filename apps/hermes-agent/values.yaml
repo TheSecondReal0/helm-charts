@@ -1,15 +1,15 @@
 image:
   repository: nousresearch/hermes-agent
-  tag: "1.0.0"
+  tag: dafe443beba74384871e2c79d5b17db8bc51880e
 
 service:
-  host: hermes.example.com
+  host: hermes.asaio
   port: 80
   targetPort: 8080
 
 persistence:
   size: 2Gi
-  storageClassName: ""
+  storageClassName: nfs-subdir
   accessModes:
     - ReadWriteOnce
 
@@ -17,6 +17,11 @@ resources: {}
 
 extraEnv: []
 extraArgs: []
+
+externalSecrets:
+  secretStoreRef:
+    name: openbao
+    kind: ClusterSecretStore
 
 httproute:
   enabled: true
