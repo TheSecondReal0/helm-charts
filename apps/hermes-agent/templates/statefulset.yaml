@@ -33,6 +33,11 @@ spec:
           env:
             - name: GIT_SSH_COMMAND
               value: "ssh -i /root/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+            - name: FORGEJO_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-forgejo
+                  key: token
 {{- with .Values.extraEnv }}
 {{ toYaml . | nindent 12 }}
 {{- end }}
