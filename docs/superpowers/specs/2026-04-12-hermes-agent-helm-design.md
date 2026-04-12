@@ -1,47 +1,35 @@
-# Hermes Agent Helm Chart Design
+# Hermes Agent Helm Chart Design (Simplified)
 
 Date: 2026-04-12
 
-## Context
-We want a Helm chart that mirrors the Hermes Agent Docker gateway setup. The repo already has per-app charts under `apps/` that use a simple pattern: Deployment/StatefulSet, Service, HTTPRoute, and PVC. We will follow those patterns while adapting to Hermes requirements.
+## Goal
+Create a single Helm chart to run Hermes Agent in gateway mode, based on the Docker setup, following patterns in `apps/`.
 
-References in repo:
-- `apps/searxng` for HTTPRoute and basic values layout
-- `apps/vikunja` for PVC patterns and environment wiring
-
-## Goals
-- Provide a single chart to run Hermes Agent in gateway mode
-- Use a StatefulSet with a PVC at `/opt/data` as the single source of truth
-- Keep the image tag pinned (no `latest`) for manual/renovate upgrades
-- Route traffic through Gateway API (HTTPRoute) like existing apps
-
-## Non-Goals
-- No ExternalSecrets or Secret generation by default
-- No automated setup job; setup is run manually by operators
-- No multi-replica support (Hermes data directory is single-writer)
-
-## Proposed Chart
+## Chart Scope
 Location: `apps/hermes-agent/`
 
 Resources:
 - StatefulSet (replicas: 1)
-- Service (ClusterIP)
-- PVC for `/opt/data`
-- HTTPRoute to `traefik-gateway` in namespace `traefik`
+- Headless Service for StatefulSet identity (`<release>-headless`)
+- ClusterIP Service for HTTPRoute traffic (`<release>`)
+- PVC via StatefulSet `volumeClaimTemplates` mounted at `/opt/data`
+- HTTPRoute to `traefik-gateway` (Gateway API v1)
 
-Container behavior:
-- Image: `nousresearch/hermes-agent:<pinned-tag>`
-- Command/args: `gateway run`
-- Optional extra env/args via values (default empty)
-- Mount PVC at `/opt/data`
+## Runtime Behavior
+- Image: `nousresearch/hermes-agent:<pinned-tag>` (no `latest`)
+- Command/args: `command: ["hermes"]`, `args: ["gateway","run", ...extraArgs]`
+- PVC mounted at `/opt/data` (Hermes data dir)
+- Exposes HTTP port 8080 by default
+- Service exposes port 80 and targets container port 8080 (repo pattern)
+- `imagePullPolicy: IfNotPresent`
+- `enableServiceLinks: false`
 
-Manual setup flow:
-1. Deploy chart
-2. Exec into the pod and run `hermes setup` (interactive wizard)
-3. The setup writes `/opt/data/.env` and config files to the PVC
-4. Restart the pod if needed to pick up new config
+## Manual Setup
+- Deploy chart
+- Run `hermes setup` inside the pod once (interactive)
+- Restart pod to pick up `/opt/data/.env` changes
 
-## Values (draft)
+## Values (minimum)
 ```
 image:
   repository: nousresearch/hermes-agent
@@ -49,33 +37,43 @@ image:
 
 service:
   host: hermes.example.com
+  port: 80
+  targetPort: 8080
 
 persistence:
   size: 2Gi
   storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
 
 resources: {}
 
-extraEnv: []
-extraArgs: []
+extraEnv: []   # list of EnvVar objects
+extraArgs: []  # list of string args appended to default args
 
 httproute:
+  enabled: true
   gatewayName: traefik-gateway
   gatewayNamespace: traefik
   sectionName: web
 ```
 
 ## Templates
-- `statefulset.yaml` with PVC volumeMount at `/opt/data`
-- `pvc.yaml` for persistent storage
-- `service.yaml` for internal access
-- `httproute.yaml` matching the `apps/searxng` pattern
+- `statefulset.yaml`: 1 replica, `serviceName: <release>-headless`, PVC mount at `/opt/data`, container port 8080
+- `service-headless.yaml`: headless service (`clusterIP: None`)
+- `service.yaml`: ClusterIP service with `port` and `targetPort`
+- `httproute.yaml`: HTTPRoute using `service.host` and `service.port`
+- Omit `storageClassName` when the value is empty
+- `volumeClaimTemplates` uses `metadata.name: data` and the mount uses `name: data`
+- Labels/selectors use `app: {{ .Release.Name }}` consistently
+- `httproute.yaml` is only rendered when `httproute.enabled` is true
 
-## Operational Notes
-- Keep replicas at 1 to avoid concurrent access to `/opt/data`
-- Upgrades: bump image tag in values and redeploy
-- Troubleshooting: `kubectl logs` and `kubectl exec` for `hermes version`
+## Notes
+- ExternalSecrets are not used
+- Single replica only (Hermes data dir is single-writer)
+- `service.host` must be set to your real hostname when HTTPRoute is enabled
 
-## Testing
-- `helm template` to validate rendered manifests
-- Deploy to a non-prod namespace and verify HTTPRoute, PVC mount, and gateway startup
+## Chart Metadata
+- `Chart.yaml` name: `hermes-agent`
+- `Chart.yaml` version: `0.1.0`
+- `Chart.yaml` appVersion matches the pinned image tag
