@@ -23,7 +23,7 @@ externalSecrets:
     name: openbao
     kind: ClusterSecretStore
   forgejoToken:
-    key: hermes/forgejo-token
+    key: herms/forgejo
     property: token
 
 httproute:

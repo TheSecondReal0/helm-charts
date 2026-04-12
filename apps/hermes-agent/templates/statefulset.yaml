@@ -36,8 +36,8 @@ spec:
             - name: FORGEJO_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-forgejo-token
-                  key: FORGEJO_TOKEN
+                  name: {{ .Release.Name }}-forgejo
+                  key: token
 {{- with .Values.extraEnv }}
 {{ toYaml . | nindent 12 }}
 {{- end }}
