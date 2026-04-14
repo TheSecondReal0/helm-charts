@@ -1,6 +1,6 @@
 image:
   repository: nousresearch/hermes-agent
-  tag: dafe443beba74384871e2c79d5b17db8bc51880e
+  tag: 1.1.4
 
 service:
   host: hermes.asaio
