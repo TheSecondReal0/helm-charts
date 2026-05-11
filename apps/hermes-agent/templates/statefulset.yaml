@@ -16,12 +16,16 @@ spec:
         app: {{ .Release.Name }}
     spec:
       enableServiceLinks: false
+{{- with .Values.podSecurityContext }}
+      securityContext:
+{{ toYaml . | nindent 8 }}
+{{- end }}
       containers:
         - name: {{ .Release.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: IfNotPresent
           command:
-            - "hermes"
+            - "./docker/entrypoint.sh"
           args:
             - "gateway"
             - "run"
@@ -49,6 +53,9 @@ spec:
             - name: git
               mountPath: /root/.ssh
               readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 0
       volumes:
         - name: git
           secret:
@@ -57,6 +64,10 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: data
+{{- with .Values.persistence.annotations }}
+        annotations:
+{{ toYaml . | nindent 10 }}
+{{- end }}
       spec:
         accessModes:
 {{ toYaml .Values.persistence.accessModes | nindent 10 }}

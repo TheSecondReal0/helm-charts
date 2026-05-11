@@ -1,9 +1,9 @@
 image:
   repository: nousresearch/hermes-agent
-  tag: v2026.5.7
+  tag: sha-825bd50e6be1bfbde38d8337c599952da32b9a92
 
 service:
-  host: hermes.asaio
+  host: hermes.cluster.asaio
   port: 80
   targetPort: 8080
 
@@ -12,6 +12,14 @@ persistence:
   storageClassName: nfs-subdir
   accessModes:
     - ReadWriteOnce
+  annotations:
+    k8s-sigs.io/nfs-directory-mode: "0770"
+    k8s-sigs.io/nfs-directory-uid: "10000"
+    k8s-sigs.io/nfs-directory-gid: "10000"
+
+podSecurityContext:
+  fsGroup: 10000
+  fsGroupChangePolicy: OnRootMismatch
 
 resources: {}
 
