@@ -34,7 +34,20 @@ spec:
 {{- end }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
+              name: gateway
+{{- if .Values.dashboard.enabled }}
+            - containerPort: {{ .Values.dashboard.targetPort }}
+              name: dashboard
+{{- end }}
           env:
+{{- if .Values.dashboard.enabled }}
+            - name: HERMES_DASHBOARD
+              value: "1"
+            - name: HERMES_DASHBOARD_HOST
+              value: {{ .Values.dashboard.bindHost | quote }}
+            - name: HERMES_DASHBOARD_PORT
+              value: {{ .Values.dashboard.port | quote }}
+{{- end }}
             - name: GIT_SSH_COMMAND
               value: "ssh -i /root/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
             - name: FORGEJO_TOKEN

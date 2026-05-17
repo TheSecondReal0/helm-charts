@@ -7,6 +7,13 @@ service:
   port: 80
   targetPort: 8080
 
+dashboard:
+  enabled: true
+  host: hermes-dashboard.cluster.asaio
+  port: 9119
+  targetPort: 9119
+  bindHost: 0.0.0.0
+
 persistence:
   size: 2Gi
   storageClassName: nfs-subdir

@@ -16,6 +16,13 @@ spec:
   selector:
     app: {{ .Release.Name }}
   ports:
-    - port: {{ .Values.service.port }}
+    - name: gateway
+      port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
       protocol: TCP
+{{- if .Values.dashboard.enabled }}
+    - name: dashboard
+      port: {{ .Values.dashboard.port }}
+      targetPort: {{ .Values.dashboard.targetPort }}
+      protocol: TCP
+{{- end }}
