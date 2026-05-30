@@ -1,6 +1,6 @@
 image:
   repository: nousresearch/hermes-agent
-  tag: sha-825bd50e6be1bfbde38d8337c599952da32b9a92
+  tag: v2026.5.29.2
 
 service:
   host: hermes.cluster.asaio
